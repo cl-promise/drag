@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            width: 500px;
+            height: 500px;
+            background-color:blue;
+            position: absolute;
+            z-index: 1000;
+        }
+        .ball {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: cyan;
+        }
+        .gate {
+            position:absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background-color: gold;
+        }
+    </style>
+</head>
+<body>
+    <div class="ball"></div>
+    <div class="gate"></div>
+    <script>
+        let ball = document.querySelector('.ball')
+        console.log(ball)
+        let currentDroppbal = null
+        let gate = document.querySelector('.gate')
+        ball.onmousedown = function (event) {
+            let shiftX = event.clientX - ball.getBoundingClientRect().left
+            let shiftY = event.clientY - ball.getBoundingClientRect().top
+            //(1)准备移动：确保absolute, 并通过设置z-index 一曲包球在顶端
+            ball.style.position = 'absolute'
+            ball.style.zIndex = 1000
+            // 将其从当前父元素中直接移动到 body 中
+            // 以使其定位是相对于 body 的
+            document.body.append(ball)
+            function moveAt (pageX, pageY) {
+                ball.style.left = pageX - shiftX + 'px'
+                ball.style.top = pageY - shiftY + 'px'
+            }
+            // 将我们绝对定位的球移到指针下方
+            moveAt(event.pageX, event.pageY)
+            function onmouseMove (event) {
+                moveAt(event.pageX, event.pageY)
+                ball.hidden = true;
+                let elemBelow = document.elementFromPoint(event.clientX, event.clientY);
+                ball.hidden = false
+                // console.log('-----', elemBelow)
+                if (gate != elemBelow) {
+                    gate.style.background = 'yellow'
+                }
+                if (gate == elemBelow) {
+                    gate.style.background = 'pink'
+                }
+            }
+            // (2) 在 mousemove 事件上移动球
+            document.addEventListener('mousemove', onmouseMove)
+            // (3) 放下球，并移除不需要的处理程序
+            ball.onmouseup = function () {
+                document.removeEventListener('mousemove', onmouseMove)
+                ball.onmouseup = null
+            }
+        }
+        ball.ondragstart = function () {
+                return false
+            }
+        //这是因为浏览器有自己的对图片和一些其他元素的拖放处理。它会在我们进行
+        //拖放操作时自动运行，并与我们的拖放处理产生了冲突。
+    </script>
+</body>
+</html>
